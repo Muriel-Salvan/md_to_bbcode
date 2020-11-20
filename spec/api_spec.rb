@@ -1,26 +1,26 @@
 describe MdToBbcode do
 
   it 'converts heading 1' do
-    expect('# Heading 1'.md_to_bbcode).to eq '[size=6]Heading 1[/size]'
+    expect('# Heading 1'.md_to_bbcode).to eq '[size=6][b]Heading 1[/b][/size]'
   end
 
   it 'converts heading 2' do
-    expect('## Heading 2'.md_to_bbcode).to eq '[size=5]Heading 2[/size]'
+    expect('## Heading 2'.md_to_bbcode).to eq '[size=6]Heading 2[/size]'
   end
 
   it 'converts heading 3' do
-    expect('### Heading 3'.md_to_bbcode).to eq '[size=4]Heading 3[/size]'
+    expect('### Heading 3'.md_to_bbcode).to eq '[size=5][b]Heading 3[/b][/size]'
   end
 
   it 'converts heading 4' do
-    expect('#### Heading 4'.md_to_bbcode).to eq '[size=3]Heading 4[/size]'
+    expect('#### Heading 4'.md_to_bbcode).to eq '[size=5]Heading 4[/size]'
   end
 
   it 'converts bold text' do
     expect('**Bold text**'.md_to_bbcode).to eq '[b]Bold text[/b]'
   end
 
-  it 'converts urls' do
+  it 'converts links' do
     expect('[Link text](https://my.domain.com/path)'.md_to_bbcode).to eq '[url=https://my.domain.com/path]Link text[/url]'
   end
 
@@ -30,6 +30,21 @@ describe MdToBbcode do
 
   it 'converts images' do
     expect('![Image text](https://my.domain.com/image.jpg)'.md_to_bbcode).to eq '[img]https://my.domain.com/image.jpg[/img]'
+  end
+
+  it 'converts bold text on several lines' do
+    md = <<~EOS
+    **Bold
+    text
+    on
+    multi-line**
+    EOS
+    expect(md.md_to_bbcode).to eq(<<~EOS)
+    [b]Bold
+    text
+    on
+    multi-line[/b]
+    EOS
   end
 
   it 'converts bullets list' do
@@ -62,6 +77,31 @@ describe MdToBbcode do
     EOS
   end
 
+  it 'converts multi-line numbered list' do
+    md = <<~EOS
+      1. List item 1
+        And another line 1
+        
+      2. List item 2
+        And another line 2
+        
+      3. List item 3
+        And another line 3
+    EOS
+    expect(md.md_to_bbcode).to eq(<<~EOS)
+      [list=1]
+      [*]List item 1
+        And another line 1
+        
+      [*]List item 2
+        And another line 2
+        
+      [*]List item 3
+        And another line 3
+      [/list]
+    EOS
+  end
+
   it 'converts code blocks' do
     md = <<~EOS
       ```ruby
@@ -73,8 +113,7 @@ describe MdToBbcode do
       ```
     EOS
     expect(md.md_to_bbcode).to eq(<<~EOS)
-      [code]
-      def hello
+      [code]def hello
         puts 'Hello world'
       end
       hello
@@ -92,6 +131,12 @@ describe MdToBbcode do
       **Bold text**
 
       Not bold followed by **bold and followed by** not bold.
+
+      Not bold followed by **bold and
+      followed
+      by** not bold on multi-lines.
+
+      **Bold text including a [link to Google](https://www.google.com).**
 
       This is a bullet list:
       * Bullet item 1
@@ -124,12 +169,92 @@ describe MdToBbcode do
       2. Numbered item 2
       3. Numbered item 3
 
+      This is a numbered list with 1 item:
+      1. Numbered item 1
+
+      This is a numbered list multi-line:
+      1. Numbered item 1
+        Additional content 1
+      2. Numbered item 2
+        Additional content 2
+        
+      3. Numbered item 3
+        Additional content 3
+
       Here is an inserted image:
       ![Example of image](https://x-aeon.com/muriel.jpg)
 
       And ending text
     EOS
     expect(md.md_to_bbcode).to eq(<<~EOS)
+      [size=6][b]Heading h1[/b][/size]
+      
+      Normal text
+      
+      [b]Bold text[/b]
+      
+      Not bold followed by [b]bold and followed by[/b] not bold.
+      
+      Not bold followed by [b]bold and
+      followed
+      by[/b] not bold on multi-lines.
+
+      [b]Bold text including a [url=https://www.google.com]link to Google[/url].[/b]
+      
+      This is a bullet list:
+      [list]
+      [*]Bullet item 1
+      [*]Bullet item 2
+      [*]Bullet item 3
+      [/list]
+      
+      [size=6]Heading h2[/size]
+      
+      Here is a link to [url=https://www.google.com/]Google[/url] in a middle of a line.
+      
+      An inline code block [b][font=Courier New]this is code[/font][/b] to be inserted.
+      
+      [size=5][b]Heading h3[/b][/size]
+      
+      [size=5]Heading h4 with [b][font=Courier New]embedded code[/font][/b][/size]
+      
+      Here is a code block in json:
+      [code]{
+        "my_json": {
+          "is": "super",
+          "great": "and",
+          "useful": true
+        }
+      }
+      [/code]
+      
+      This is a numbered list:
+      [list=1]
+      [*]Numbered item 1
+      [*]Numbered item 2
+      [*]Numbered item 3
+      [/list]
+
+      This is a numbered list with 1 item:
+      [list=1]
+      [*]Numbered item 1
+      [/list]
+      
+      This is a numbered list multi-line:
+      [list=1]
+      [*]Numbered item 1
+        Additional content 1
+      [*]Numbered item 2
+        Additional content 2
+        
+      [*]Numbered item 3
+        Additional content 3
+      [/list]
+      
+      Here is an inserted image:
+      [img]https://x-aeon.com/muriel.jpg[/img]
+      
+      And ending text
     EOS
   end
 
