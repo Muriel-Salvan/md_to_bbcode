@@ -1,0 +1,5 @@
+# Rubygems should not have Gemfile.lock file commited
+Gemfile.lock
+
+# The vendor directory is containing local dependencies
+vendor/
