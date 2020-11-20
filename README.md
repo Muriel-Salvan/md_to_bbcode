@@ -2,7 +2,7 @@
 
 **Convert Markdown text to Bbcode**
 
-Provides an API and an executable to convert MArkdown text to BBCode format
+Provides an API and an executable to convert Markdown text to BBCode format
 
 ## Getting Started
 

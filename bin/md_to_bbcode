@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+require 'md_to_bbcode'
+require 'md_to_bbcode/version'
+require 'optparse'
+
+markdown_file = nil
+bbcode_file = nil
+opts_parser = OptionParser.new do |opts|
+  opts.banner = 'Usage: md_to_bbcode [options]'
+  opts.on('-h', '--help', 'Display this help') do
+    puts opts
+    exit 0
+  end
+  opts.on('-i', '--input MARKDOWN_FILE', 'Specify the input Markdown file to convert (mandatory)') do |file|
+    markdown_file = file
+  end
+  opts.on('-o', '--output BBCODE_FILE', 'Specify the output BBCode file to write (outputs to stdout if not specified') do |file|
+    bbcode_file = file
+  end
+  opts.on('-v', '--version', 'Display version') do
+    puts "md_to_bbcode v#{MdToBbcode::VERSION}"
+    exit 0
+  end
+end
+opts_parser.parse!
+
+if !ARGV.empty? || markdown_file.nil?
+  puts opts_parser
+  exit 1
+end
+
+unless File.exist?(markdown_file)
+  puts "Missing file #{markdown_file}"
+  exit 2
+end
+
+bbcode = File.read(markdown_file).md_to_bbcode
+if bbcode_file.nil?
+  puts bbcode
+else
+  File.write(bbcode_file, bbcode)
+end

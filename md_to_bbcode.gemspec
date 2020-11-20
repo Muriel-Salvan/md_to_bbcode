@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.authors = ['Muriel Salvan']
   s.email = ['muriel@x-aeon.com']
   s.summary = 'Convert Markdown text to Bbcode'
-  s.description = 'Provides an API and an executable to convert MArkdown text to BBCode format'
+  s.description = 'Provides an API and an executable to convert Markdown text to BBCode format'
   s.homepage = 'https://github.com/Muriel-Salvan/md_to_bbcode'
   s.license = 'BSD-3-Clause'
 
