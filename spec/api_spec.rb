@@ -47,6 +47,27 @@ describe MdToBbcode do
     EOS
   end
 
+  it 'converts bold text on several lines mixed with single lines' do
+    md = <<~EOS
+    **Bold text** on **single and
+    on
+    multi-line** but **with** some **new
+    text
+    on** other **lines**
+    all
+    **mixed** up
+    EOS
+    expect(md.md_to_bbcode).to eq(<<~EOS)
+    [b]Bold text[/b] on [b]single and
+    on
+    multi-line[/b] but [b]with[/b] some [b]new
+    text
+    on[/b] other [b]lines[/b]
+    all
+    [b]mixed[/b] up
+    EOS
+  end
+
   it 'converts bullets list' do
     md = <<~EOS
       * List item 1
@@ -122,6 +143,84 @@ describe MdToBbcode do
     EOS
   end
 
+  it 'does not convert other items in code blocks' do
+    md = <<~EOS
+      ```ruby
+      # This is not a heading
+      def hello
+        puts 'Hello **world**'
+        puts `hostname`
+      end
+      # Call function
+      hello
+      puts '[This is a link](https://google.com)'
+      puts <<~EOS2
+      * And this
+      * is
+      * a list!
+      EOS2
+      $stdin.gets
+      ```
+    EOS
+    expect(md.md_to_bbcode).to eq(<<~EOS)
+      [code]# This is not a heading
+      def hello
+        puts 'Hello **world**'
+        puts `hostname`
+      end
+      # Call function
+      hello
+      puts '[This is a link](https://google.com)'
+      puts <<~EOS2
+      * And this
+      * is
+      * a list!
+      EOS2
+      $stdin.gets
+      [/code]
+    EOS
+  end
+
+  it 'converts multi-line list with code blocks' do
+    md = <<~EOS
+      1. List item 1
+        ```ruby
+        puts 'This is code 1'
+        $stdin.gets
+        ```
+        
+      2. List item 2
+        ```ruby
+        puts 'This is code 2'
+        $stdin.gets
+        ```
+        
+      3. List item 3
+        ```ruby
+        puts 'This is code 3'
+        $stdin.gets
+        ```
+    EOS
+    expect(md.md_to_bbcode).to eq(<<~EOS)
+      [list=1]
+      [*]List item 1
+        [code]  puts 'This is code 1'
+        $stdin.gets
+        [/code]
+        
+      [*]List item 2
+        [code]  puts 'This is code 2'
+        $stdin.gets
+        [/code]
+        
+      [*]List item 3
+        [code]  puts 'This is code 3'
+        $stdin.gets
+        [/code]
+      [/list]
+    EOS
+  end
+
   it 'converts a whole text mixing markups' do
     md = <<~EOS
       # Heading h1
@@ -168,6 +267,13 @@ describe MdToBbcode do
       1. Numbered item 1
       2. Numbered item 2
       3. Numbered item 3
+
+      Here is some Ruby:
+      ```ruby
+      puts 'Hello'
+      # World
+      puts `echo World`
+      ```
 
       This is a numbered list with 1 item:
       1. Numbered item 1
@@ -234,6 +340,12 @@ describe MdToBbcode do
       [*]Numbered item 2
       [*]Numbered item 3
       [/list]
+
+      Here is some Ruby:
+      [code]puts 'Hello'
+      # World
+      puts `echo World`
+      [/code]
 
       This is a numbered list with 1 item:
       [list=1]
