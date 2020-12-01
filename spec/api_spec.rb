@@ -20,6 +20,14 @@ describe MdToBbcode do
     expect('**Bold text**'.md_to_bbcode).to eq '[b]Bold text[/b]'
   end
 
+  it 'converts italic text' do
+    expect('*Italic text*'.md_to_bbcode).to eq '[i]Italic text[/i]'
+  end
+
+  it 'converts italic and bold mixed text' do
+    expect('*Italic and **bold** text* and then **bold and *italic* text**'.md_to_bbcode).to eq '[i]Italic and [b]bold[/b] text[/i] and then [b]bold and [i]italic[/i] text[/b]'
+  end
+
   it 'converts links' do
     expect('[Link text](https://my.domain.com/path)'.md_to_bbcode).to eq '[url=https://my.domain.com/path]Link text[/url]'
   end
@@ -34,37 +42,60 @@ describe MdToBbcode do
 
   it 'converts bold text on several lines' do
     md = <<~EOS
-    **Bold
-    text
-    on
-    multi-line**
+      **Bold
+      text
+      on
+      multi-line**
     EOS
     expect(md.md_to_bbcode).to eq(<<~EOS)
-    [b]Bold
-    text
-    on
-    multi-line[/b]
+      [b]Bold
+      text
+      on
+      multi-line[/b]
     EOS
   end
 
   it 'converts bold text on several lines mixed with single lines' do
     md = <<~EOS
-    **Bold text** on **single and
-    on
-    multi-line** but **with** some **new
-    text
-    on** other **lines**
-    all
-    **mixed** up
+      **Bold text** on **single and
+      on
+      multi-line** but **with** some **new
+      text
+      on** other **lines**
+      all
+      **mixed** up
     EOS
     expect(md.md_to_bbcode).to eq(<<~EOS)
-    [b]Bold text[/b] on [b]single and
-    on
-    multi-line[/b] but [b]with[/b] some [b]new
-    text
-    on[/b] other [b]lines[/b]
-    all
-    [b]mixed[/b] up
+      [b]Bold text[/b] on [b]single and
+      on
+      multi-line[/b] but [b]with[/b] some [b]new
+      text
+      on[/b] other [b]lines[/b]
+      all
+      [b]mixed[/b] up
+    EOS
+  end
+
+  it 'converts bold and italic texts on several lines mixed with single lines' do
+    md = <<~EOS
+      **Bold text** on **single and
+      *on italic
+      words* on
+      multi-line** but **with** some **new
+      text
+      on** other **lines**
+      all *italic **and bold**
+      **mixed*** up
+    EOS
+    expect(md.md_to_bbcode).to eq(<<~EOS)
+      [b]Bold text[/b] on [b]single and
+      [i]on italic
+      words[/i] on
+      multi-line[/b] but [b]with[/b] some [b]new
+      text
+      on[/b] other [b]lines[/b]
+      all [i]italic [b]and bold[/b]
+      [b]mixed[/b][/i] up
     EOS
   end
 
@@ -235,7 +266,7 @@ describe MdToBbcode do
       followed
       by** not bold on multi-lines.
 
-      **Bold text including a [link to Google](https://www.google.com).**
+      **Bold text including an italic *[link to Google](https://www.google.com)*.**
 
       This is a bullet list:
       * Bullet item 1
@@ -270,7 +301,7 @@ describe MdToBbcode do
 
       Here is some Ruby:
       ```ruby
-      puts 'Hello'
+      puts 'Hello' * 3 * 5
       # World
       puts `echo World`
       ```
@@ -305,7 +336,7 @@ describe MdToBbcode do
       followed
       by[/b] not bold on multi-lines.
 
-      [b]Bold text including a [url=https://www.google.com]link to Google[/url].[/b]
+      [b]Bold text including an italic [i][url=https://www.google.com]link to Google[/url][/i].[/b]
       
       This is a bullet list:
       [list]
@@ -342,7 +373,7 @@ describe MdToBbcode do
       [/list]
 
       Here is some Ruby:
-      [code]puts 'Hello'
+      [code]puts 'Hello' * 3 * 5
       # World
       puts `echo World`
       [/code]

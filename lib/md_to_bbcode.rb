@@ -13,6 +13,7 @@ module MdToBbcode
     in_a_list = false
     in_a_code_block = false
     in_bold_text = false
+    in_italic_text = false
     markdown.split("\n").each do |line|
       unindented_line = in_a_list && line =~ /^  (.*)$/ ? $1 : line
       if unindented_line =~ /^```(.*)$/
@@ -33,7 +34,7 @@ module MdToBbcode
         line.gsub!(/!\[(.*?)\]\((.*?)\)/, '[img]\2[/img]')
         # Links
         line.gsub!(/\[(.*?)\]\((.*?)\)/, '[url=\2]\1[/url]')
-        # Bold
+        # Bold (do this before italic)
         if in_bold_text
           line.gsub!(/\*\*(.*?)\*\*/, '[/b]\1[b]')
         else
@@ -48,6 +49,21 @@ module MdToBbcode
             in_bold_text = true
           end
         end
+        # Italic
+        if in_italic_text
+          line.gsub!(/\*(\S.*?)\*/, '[/i]\1[i]')
+        else
+          line.gsub!(/\*(\S.*?)\*/, '[i]\1[/i]')
+        end
+        if line =~ /.*\*.*/
+          if in_italic_text
+            line.gsub!(/(.*\S)\*(.*)/, '\1[/i]\2')
+            in_italic_text = false
+          else
+            line.gsub!(/(.*)\*(\S.*)/, '\1[i]\2')
+            in_italic_text = true
+          end
+        end
         # Heading 1
         line.gsub!(/^# (.*?)$/, '[size=6][b]\1[/b][/size]')
         # Heading 2
@@ -58,6 +74,7 @@ module MdToBbcode
         line.gsub!(/^#### (.*?)$/, '[size=5]\1[/size]')
         # In-line code
         line.gsub!(/`(.*?)`/, '[b][font=Courier New]\1[/font][/b]')
+        # Bullets
         if line =~ /^\* (.+)$/
           # Single bullet line
           bbcode_lines << "[list]\n" unless in_a_list
