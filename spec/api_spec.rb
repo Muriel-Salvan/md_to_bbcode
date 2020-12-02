@@ -24,6 +24,19 @@ describe MdToBbcode do
     expect('*Italic text*'.md_to_bbcode).to eq '[i]Italic text[/i]'
   end
 
+  it 'converts italic text after a list' do
+    md = <<~EOS
+      * List item
+      *Italic text*
+    EOS
+    expect(md.md_to_bbcode).to eq(<<~EOS)
+      [list]
+      [*]List item
+      [/list]
+      [i]Italic text[/i]
+    EOS
+  end
+
   it 'converts italic and bold mixed text' do
     expect('*Italic and **bold** text* and then **bold and *italic* text**'.md_to_bbcode).to eq '[i]Italic and [b]bold[/b] text[/i] and then [b]bold and [i]italic[/i] text[/b]'
   end

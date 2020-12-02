@@ -62,14 +62,12 @@ module MdToBbcode
             else
               field.gsub!(/\*(\S.*?)\*/, '[i]\1[/i]')
             end
-            if field =~ /.*\*.*/
-              if in_italic_text
-                field.gsub!(/(.*\S)\*(.*)/, '\1[/i]\2')
-                in_italic_text = false
-              else
-                field.gsub!(/(.*)\*(\S.*)/, '\1[i]\2')
-                in_italic_text = true
-              end
+            if in_italic_text && field =~ /.*\S\*.*/
+              field.gsub!(/(.*\S)\*(.*)/, '\1[/i]\2')
+              in_italic_text = false
+            elsif !in_italic_text && field =~ /.*\*\S.*/
+              field.gsub!(/(.*)\*(\S.*)/, '\1[i]\2')
+              in_italic_text = true
             end
             field
           end
