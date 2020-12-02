@@ -36,6 +36,48 @@ describe MdToBbcode do
     expect('`in-line code`'.md_to_bbcode).to eq '[b][font=Courier New]in-line code[/font][/b]'
   end
 
+  it 'converts inline code in bold text' do
+    expect('**Bold `in-line code` to display**'.md_to_bbcode).to eq '[b]Bold [font=Courier New]in-line code[/font] to display[/b]'
+  end
+
+  it 'converts inline code in italic text' do
+    expect('*Italic `in-line code` to display*'.md_to_bbcode).to eq '[i]Italic [b][font=Courier New]in-line code[/font][/b] to display[/i]'
+  end
+
+  it 'converts inline code in a multi-line bold text' do
+    md = <<~EOS
+      **Bold
+      `in-line code`
+      on
+      multi-line**
+    EOS
+    expect(md.md_to_bbcode).to eq(<<~EOS)
+      [b]Bold
+      [font=Courier New]in-line code[/font]
+      on
+      multi-line[/b]
+    EOS
+  end
+
+  it 'converts inline code in a multi-line italic text' do
+    md = <<~EOS
+      *Italic
+      `in-line code`
+      on
+      multi-line*
+    EOS
+    expect(md.md_to_bbcode).to eq(<<~EOS)
+      [i]Italic
+      [b][font=Courier New]in-line code[/font][/b]
+      on
+      multi-line[/i]
+    EOS
+  end
+
+  it 'does not convert other formatting in inline code' do
+    expect('`# in-line *code* that is **not formatted**`'.md_to_bbcode).to eq '[b][font=Courier New]# in-line *code* that is **not formatted**[/font][/b]'
+  end
+
   it 'converts images' do
     expect('![Image text](https://my.domain.com/image.jpg)'.md_to_bbcode).to eq '[img]https://my.domain.com/image.jpg[/img]'
   end
@@ -278,6 +320,7 @@ describe MdToBbcode do
       Here is a link to [Google](https://www.google.com/) in a middle of a line.
 
       An inline code block `this is code` to be inserted.
+      And **another one in bold: `this is *code* that **is preformatted**` but written** in bold.
 
       ### Heading h3
 
@@ -350,6 +393,7 @@ describe MdToBbcode do
       Here is a link to [url=https://www.google.com/]Google[/url] in a middle of a line.
       
       An inline code block [b][font=Courier New]this is code[/font][/b] to be inserted.
+      And [b]another one in bold: [font=Courier New]this is *code* that **is preformatted**[/font] but written[/b] in bold.
       
       [size=5][b]Heading h3[/b][/size]
       

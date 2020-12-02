@@ -30,40 +30,50 @@ module MdToBbcode
         # Don't change anything at the formatting
         bbcode_lines << "#{line}\n"
       else
-        # Images (do this gsub before links and any single tags, like bold, headings...)
-        line.gsub!(/!\[(.*?)\]\((.*?)\)/, '[img]\2[/img]')
-        # Links
-        line.gsub!(/\[(.*?)\]\((.*?)\)/, '[url=\2]\1[/url]')
-        # Bold (do this before italic)
-        if in_bold_text
-          line.gsub!(/\*\*(.*?)\*\*/, '[/b]\1[b]')
-        else
-          line.gsub!(/\*\*(.*?)\*\*/, '[b]\1[/b]')
-        end
-        if line =~ /.*\*\*.*/
-          if in_bold_text
-            line.gsub!(/(.*)\*\*(.*)/, '\1[/b]\2')
-            in_bold_text = false
+        # Handle in-line code markers first
+        line = line.split(/(`.+?`)/).map do |field|
+          if field[0] == '`'
+            # Don't change anything at the formatting
+            "#{in_bold_text ? '' : '[b]'}[font=Courier New]#{field[1..-2]}[/font]#{in_bold_text ? '' : '[/b]'}"
           else
-            line.gsub!(/(.*)\*\*(.*)/, '\1[b]\2')
-            in_bold_text = true
+            # Apply the formatting except the formatting used for whole lines (headers, bullets, lists...)
+            # Images (do this gsub before links and any single tags, like bold, headings...)
+            field.gsub!(/!\[(.*?)\]\((.*?)\)/, '[img]\2[/img]')
+            # Links
+            field.gsub!(/\[(.*?)\]\((.*?)\)/, '[url=\2]\1[/url]')
+            # Bold (do this before italic)
+            if in_bold_text
+              field.gsub!(/\*\*(.*?)\*\*/, '[/b]\1[b]')
+            else
+              field.gsub!(/\*\*(.*?)\*\*/, '[b]\1[/b]')
+            end
+            if field =~ /.*\*\*.*/
+              if in_bold_text
+                field.gsub!(/(.*)\*\*(.*)/, '\1[/b]\2')
+                in_bold_text = false
+              else
+                field.gsub!(/(.*)\*\*(.*)/, '\1[b]\2')
+                in_bold_text = true
+              end
+            end
+            # Italic
+            if in_italic_text
+              field.gsub!(/\*(\S.*?)\*/, '[/i]\1[i]')
+            else
+              field.gsub!(/\*(\S.*?)\*/, '[i]\1[/i]')
+            end
+            if field =~ /.*\*.*/
+              if in_italic_text
+                field.gsub!(/(.*\S)\*(.*)/, '\1[/i]\2')
+                in_italic_text = false
+              else
+                field.gsub!(/(.*)\*(\S.*)/, '\1[i]\2')
+                in_italic_text = true
+              end
+            end
+            field
           end
-        end
-        # Italic
-        if in_italic_text
-          line.gsub!(/\*(\S.*?)\*/, '[/i]\1[i]')
-        else
-          line.gsub!(/\*(\S.*?)\*/, '[i]\1[/i]')
-        end
-        if line =~ /.*\*.*/
-          if in_italic_text
-            line.gsub!(/(.*\S)\*(.*)/, '\1[/i]\2')
-            in_italic_text = false
-          else
-            line.gsub!(/(.*)\*(\S.*)/, '\1[i]\2')
-            in_italic_text = true
-          end
-        end
+        end.join
         # Heading 1
         line.gsub!(/^# (.*?)$/, '[size=6][b]\1[/b][/size]')
         # Heading 2
@@ -72,8 +82,6 @@ module MdToBbcode
         line.gsub!(/^### (.*?)$/, '[size=5][b]\1[/b][/size]')
         # Heading 4
         line.gsub!(/^#### (.*?)$/, '[size=5]\1[/size]')
-        # In-line code
-        line.gsub!(/`(.*?)`/, '[b][font=Courier New]\1[/font][/b]')
         # Bullets
         if line =~ /^\* (.+)$/
           # Single bullet line
