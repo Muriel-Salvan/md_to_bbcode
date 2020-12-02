@@ -1,3 +1,7 @@
+# 1.1.2
+
+* [Bug correction] - Format italic correctly when followed by list items.
+
 # 1.1.1
 
 * Don't convert formatting in in-line code
