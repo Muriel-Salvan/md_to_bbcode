@@ -1,3 +1,7 @@
+# 1.1.1
+
+* Don't convert formatting in in-line code
+
 # 1.1.0
 
 * Add support for italic

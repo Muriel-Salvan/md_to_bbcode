@@ -21,5 +21,5 @@ Gem::Specification.new do |s|
 
   # Development dependencies (tests, debugging)
   # Test framework
-  s.add_development_dependency 'rspec'
+  s.add_development_dependency 'rspec', '~> 3.10'
 end
