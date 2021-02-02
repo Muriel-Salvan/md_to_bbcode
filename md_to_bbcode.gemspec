@@ -18,6 +18,8 @@ Gem::Specification.new do |s|
   end
 
   # Dependencies
+  # Test framework
+  s.add_runtime_dependency 'redcarpet', '~> 3.5'
 
   # Development dependencies (tests, debugging)
   # Test framework
